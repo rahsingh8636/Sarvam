@@ -2,15 +2,6 @@
 
 This project demonstrates a complete weight-based canary deployment setup using Kubernetes, Argo Rollouts, and FastAPI. It includes manual approval workflows, traffic splitting, monitoring, and emergency deployment capabilities.
 
----
-
-## 📸 Demo Screenshots / Video
-
-> **Add your screenshots or a link to a demo video here!**
-> - Screenshot: Argo Rollouts dashboard showing canary stages
-> - Screenshot: Prometheus error rate graph
-> - Screenshot: FastAPI versioned response
-> - Video: [Demo video link here]
 
 ---
 
@@ -146,16 +137,8 @@ kubectl apply -f k8s/app/
 - `GET /version` - Version information
 - `POST /simulate-error` - Simulate errors for testing
 
-## Troubleshooting
 
-See [docs/troubleshooting.md](docs/troubleshooting.md) for common issues and solutions.
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
 
 ## License
 
