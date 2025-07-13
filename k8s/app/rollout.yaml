@@ -1,0 +1,92 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: canary-app-rollout
+  namespace: canary-demo
+  labels:
+    app: canary-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: canary-app
+  template:
+    metadata:
+      labels:
+        app: canary-app
+    spec:
+      containers:
+      - name: canary-app
+        image: canary-demo:latest
+        ports:
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+        env:
+        - name: APP_VERSION
+          value: "v1.0.0"
+        - name: APP_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: canary-app-config
+              key: APP_NAME
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: canary-app-config
+              key: LOG_LEVEL
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+  strategy:
+    canary:
+      steps:
+      # Stage 1: 5% traffic
+      - setWeight: 5
+      - pause:
+          duration: 30s
+      # Stage 2: 25% traffic (requires manual approval)
+      - setWeight: 25
+      - pause: {}
+      # Stage 3: 50% traffic (requires manual approval)
+      - setWeight: 50
+      - pause: {}
+      # Stage 4: 100% traffic (requires manual approval)
+      - setWeight: 100
+      - pause: {}
+      analysis:
+        templates:
+        - templateName: error-rate-analysis
+        args:
+        - name: service-name
+          value: canary-app-service.canary-demo.svc.cluster.local
+        - name: error-rate-threshold
+          value: "0.1"
+        - name: interval
+          value: "30s"
+        - name: count
+          value: "5"
+      trafficRouting:
+        nginx:
+          stableIngress: canary-app-ingress
+          annotationPrefix: nginx.ingress.kubernetes.io 

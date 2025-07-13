@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: canary-app-config
+  namespace: canary-demo
+  labels:
+    app: canary-app
+data:
+  APP_NAME: "canary-demo"
+  LOG_LEVEL: "INFO" 
